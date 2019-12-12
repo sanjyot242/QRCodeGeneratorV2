@@ -130,14 +130,20 @@ public class MainActivity extends AppCompatActivity {
             }
             else
             {
-                SecretKeys key ;
+                SecretKeys key,privatekey2 ;
                 try {
                     //Generating Private Key Through Library
-                    String EXAMPLE_PASSWORD = value[0];// Get password from user input
-                    String salt = saltString(generateSalt());
+                    privatekey2=generateKey();
+                    //converting private key into String
+                    String Sprivatekey2=keyString(privatekey2);
+                    String EXAMPLE_PASSWORD = Sprivatekey2+value[0] ;// Get password from user input
+                    String salt = "RightWatchmanRightWatchman";
+                    System.out.println("SAlt: "+salt);
                     // You can store the salt, it's not secret. Don't store the key. Derive from password every time
                     //Log.i(TAG, "Salt: " + salt);
                     key = generateKeyFromPassword(EXAMPLE_PASSWORD, salt);
+
+
                    // System.out.println("String : "+keys);
                     //Combining Private Key and Public Key as Mainkey
 
@@ -154,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     String key1=keyString(key);
 
                     //String Values in Firebase in Format documentname->ncharacters  and value->PrivateKey
-                    databaseReference.child("keyName").child(upToNCharacters).setValue(key1).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    databaseReference.child("keyName").child(upToNCharacters).setValue(Sprivatekey2).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(MainActivity.this, "Finally!!!!", Toast.LENGTH_SHORT).show();
@@ -196,7 +202,12 @@ public class MainActivity extends AppCompatActivity {
 //                            // ...
 //                        }
 //                    });
-//                    SecretKeys dkey = keys(Mainkey);
+                   // SecretKeys dkey = keys(Sprivatekey2);
+//                    String EXAMPLE_PASSWORD1 = Sprivatekey2+value[0] ;// Get password from user input
+//                    // You can store the salt, it's not secret. Don't store the key. Derive from password every time
+//                    //Log.i(TAG, "Salt: " + salt);
+//                    dkey = generateKeyFromPassword(EXAMPLE_PASSWORD1, salt);
+//                    System.out.println(dkey);
 //                    CipherTextIvMac cipherTextIvMac1 = new CipherTextIvMac(ciphertextString);
 //                    String plainText = decryptString(cipherTextIvMac1, dkey);
 //                    //textView.setText(plainText);

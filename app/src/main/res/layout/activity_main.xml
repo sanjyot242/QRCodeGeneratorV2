@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:hint="Enter a String  "
         android:textSize="20sp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:backgroundTint="@color/colorAccent"
         android:id="@+id/Input"
         />
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/Input"
         android:layout_centerInParent="true"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="Generate"
         android:textAlignment="center"
         android:textSize="18sp"
@@ -33,18 +33,19 @@
         android:layout_height="350dp"
         android:layout_below="@+id/Generate"
         android:layout_centerInParent="true"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="15dp"
         android:id="@+id/qrimage"
         />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/share"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/qrimage"
-        android:textSize="20sp"
-        android:textColor="@color/colorPrimary"
-        />
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
+
+        android:text="Share" />
 
 
 </RelativeLayout>
