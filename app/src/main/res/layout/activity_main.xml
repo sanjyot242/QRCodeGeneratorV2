@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter a String  "
+        android:textSize="20sp"
+        android:layout_marginTop="40dp"
+        android:backgroundTint="@color/colorAccent"
+        android:id="@+id/Input"
+        />
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/Input"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
+        android:text="Generate"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:id="@+id/Generate"
+        />
+    <ImageView
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_below="@+id/Generate"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
+        android:id="@+id/qrimage"
+        />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/qrimage"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        />
+
+
+</RelativeLayout>
