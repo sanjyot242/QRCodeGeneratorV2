@@ -44,7 +44,7 @@
         android:layout_below="@+id/qrimage"
         android:layout_centerInParent="true"
         android:layout_marginTop="30dp"
-
+        android:onClick="OnClickShare"
         android:text="Share" />
 
 

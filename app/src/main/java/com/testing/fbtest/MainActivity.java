@@ -3,12 +3,17 @@ package com.testing.fbtest;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,8 +34,11 @@ import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.tozny.crypto.android.AesCbcWithIntegrity;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -44,36 +52,10 @@ import static com.tozny.crypto.android.AesCbcWithIntegrity.keys;
 
 public class MainActivity extends AppCompatActivity {
 
-//    public void encryptData(String plaintext,SecretKey originaltext) {
-//        System.out.println("-------Encrypting data using AES algorithm-------");
-//        try {
-//            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-//            keyGenerator.init(128);
-//            SecretKey secretKey = keyGenerator.generateKey();
-//            byte[] plaintTextByteArray = plaintext.getBytes("UTF8");
-//
-//            Cipher cipher = Cipher.getInstance("AES");
-//            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-//            byte[] cipherText = cipher.doFinal(plaintTextByteArray);
-//
-//            System.out.println("Original data: " + plaintext);
-//            System.out.println("Encrypted data:");
-//
-////            for (int i = 0; i < cipherText.length; i++) {
-////                System.out.print(cipherText[i] + " ");
-////
-////            }
-//        }
-//        catch(Exception ex){
-//            ex.printStackTrace();
-//        }
-//    }
-
     private EditText input;
     private Button  generate;
     private ImageView QRimage;
     private FirebaseAuth auth;
-    private TextView textView;
     private Button Share;
     private DatabaseReference databaseReference;
 
@@ -89,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
         generate=findViewById(R.id.Generate);
         QRimage=findViewById(R.id.qrimage);
         Share=findViewById(R.id.share);
-       // textView=findViewById(R.id.textView);
         //Initializing String to Take Public Key from Firebase
         final String[] value = {""};
+
 
 
         //Taking public key from Firebase
@@ -114,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-
         //OnClick Listner
         generate.setOnClickListener(v ->{
             //Taking UserInput
             String usrInput=input.getText().toString().trim();
+            //Appending String to user input
             String usrInput1=usrInput+"Check";
            //System.out.println(usrInput1);
 
@@ -136,28 +118,27 @@ public class MainActivity extends AppCompatActivity {
                     privatekey2=generateKey();
                     //converting private key into String
                     String Sprivatekey2=keyString(privatekey2);
-                    String EXAMPLE_PASSWORD = Sprivatekey2+value[0] ;// Get password from user input
+                    // Creating a String(private key generated randomly + public key from database) to encrypt using salt
+                    String EXAMPLE_PASSWORD = Sprivatekey2+value[0] ;
+                    //Salt string
                     String salt = "RightWatchmanRightWatchman";
+
                     System.out.println("SAlt: "+salt);
                     // You can store the salt, it's not secret. Don't store the key. Derive from password every time
                     //Log.i(TAG, "Salt: " + salt);
+
+                    //Generating Key
                     key = generateKeyFromPassword(EXAMPLE_PASSWORD, salt);
 
 
-                   // System.out.println("String : "+keys);
-                    //Combining Private Key and Public Key as Mainkey
-
-                    //Typecasting String value To SecretKeys
 
                     //Performing Encryption
-
                     CipherTextIvMac cipherTextIvMac = encrypt(usrInput1,key);
                     //store or send to server
                     String ciphertextString = cipherTextIvMac.toString().trim();
-
                     //Taking 10 characters from ciphertext to be document name
                     String upToNCharacters = ciphertextString.substring(0, Math.min(ciphertextString.length(), 10));
-                    String key1=keyString(key);
+                    //String key1=keyString(key);
 
                     //String Values in Firebase in Format documentname->ncharacters  and value->PrivateKey
                     databaseReference.child("keyName").child(upToNCharacters).setValue(Sprivatekey2).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -182,6 +163,10 @@ public class MainActivity extends AppCompatActivity {
                     BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                     Bitmap bitmap = barcodeEncoder.encodeBitmap(ciphertextString, BarcodeFormat.QR_CODE, 350, 350);
                     QRimage.setImageBitmap(bitmap);
+
+                    Share.setOnClickListener(v1 -> {
+                        OnClickShare(QRimage);
+                    });
 
                     //System.out.println("Cipher Text:"+ciphertextString);
                     //System.out.println("First n Characters > Document name : "+upToNCharacters);
@@ -234,13 +219,38 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-
-
-
         });
 
 
 
-
+    }
+//Onclick method
+    private void OnClickShare(ImageView view) {
+        //taking Bitmap from image view
+        Bitmap bitmap = ((BitmapDrawable)view.getDrawable()).getBitmap();
+        try {
+            //getting location and saving image as qrcode.png
+            File file = new File(this.getExternalCacheDir(),"qrcode.png");
+            FileOutputStream fOut = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            fOut.flush();
+            fOut.close();
+            file.setReadable(true, false);
+            //starting send intent
+            final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            intent.setType("image/png");
+            //to avoid "exposed beyond app through ClipData.Item.getUri"
+            Uri apkURI = FileProvider.getUriForFile(
+                    this,
+                    this.getApplicationContext()
+                            .getPackageName() + ".provider", file);
+            intent.setDataAndType(apkURI, "image/png");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Share image via"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
