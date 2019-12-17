@@ -11,13 +11,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCanceledListener;
@@ -32,32 +31,36 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
-import com.tozny.crypto.android.AesCbcWithIntegrity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.util.Base64;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static com.tozny.crypto.android.AesCbcWithIntegrity.*;
 import static com.tozny.crypto.android.AesCbcWithIntegrity.keyString;
-import static com.tozny.crypto.android.AesCbcWithIntegrity.keys;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText input;
-    private Button  generate;
+    private Button generate;
     private ImageView QRimage;
     private FirebaseAuth auth;
     private Button Share;
     private DatabaseReference databaseReference;
+    private Button Save;
+    private static final String TAG = "MyActivity";
+    //Initializing String to Take Public Key from Firebase
+    final String[] value = {""};
+    String usrInput1;
+    String upToNCharacters;
+    String Sprivatekey2;
+    String ciphertextString;
+    Boolean val=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +70,11 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
-        input=findViewById(R.id.Input);
-        generate=findViewById(R.id.Generate);
-        QRimage=findViewById(R.id.qrimage);
-        Share=findViewById(R.id.share);
-        //Initializing String to Take Public Key from Firebase
-        final String[] value = {""};
+        input = findViewById(R.id.Input);
+        generate = findViewById(R.id.Generate);
+        QRimage = findViewById(R.id.qrimage);
+        Share = findViewById(R.id.share);
+        Save = findViewById(R.id.Save);
 
 
 
@@ -97,76 +99,72 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //OnClick Listner
-        generate.setOnClickListener(v ->{
+        generate.setOnClickListener(v -> {
             //Taking UserInput
-            String usrInput=input.getText().toString().trim();
+            String usrInput = input.getText().toString().trim();
             //Appending String to user input
-            String usrInput1=usrInput+"Check";
-           //System.out.println(usrInput1);
+            String usrInput1 = usrInput + "Check";
+            //System.out.println(usrInput1);
 
 
             //Condition if user field is empty
-            if(TextUtils.isEmpty(usrInput))
-            {
+            if (TextUtils.isEmpty(usrInput)) {
                 Toast.makeText(this, "Enter a String Before proceeding", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                SecretKeys key,privatekey2 ;
+            } else {
+                //SecretKeys key, privatekey2;
                 try {
-                    //Generating Private Key Through Library
-                    privatekey2=generateKey();
-                    //converting private key into String
-                    String Sprivatekey2=keyString(privatekey2);
-                    // Creating a String(private key generated randomly + public key from database) to encrypt using salt
-                    String EXAMPLE_PASSWORD = Sprivatekey2+value[0] ;
-                    //Salt string
-                    String salt = "RightWatchmanRightWatchman";
+                   // Generating Private Key Through Library
+//                    privatekey2 = generateKey();
+//                    //converting private key into String
+//                    String Sprivatekey2 = keyString(privatekey2);
+//                    // Creating a String(private key generated randomly + public key from database) to encrypt using salt
+//                    String EXAMPLE_PASSWORD = Sprivatekey2 + value[0];
+//                    //Salt string
+//                    String salt = "RightWatchmanRightWatchman";
+//
+//                    System.out.println("SAlt: " + salt);
+//                    // You can store the salt, it's not secret. Don't store the key. Derive from password every time
+//                    //Log.i(TAG, "Salt: " + salt);
+//
+//                    //Generating Key
+//                    key = generateKeyFromPassword(EXAMPLE_PASSWORD, salt);
+//
+//
+//                    //Performing Encryption
+//                    CipherTextIvMac cipherTextIvMac = encrypt(usrInput1, key);
+//                    //store or send to server
+//                    String ciphertextString = cipherTextIvMac.toString().trim();
+//                    //Taking 10 characters from ciphertext to be document name
+//                    String upToNCharacters = ciphertextString.substring(0, Math.min(ciphertextString.length(), 10));
+//
+//                    //String Values in Firebase in Format documentname->ncharacters  and value->PrivateKey
+//                    databaseReference.child("keyName").child(upToNCharacters).setValue(Sprivatekey2).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                        @Override
+//                        public void onSuccess(Void aVoid) {
+//                            Toast.makeText(MainActivity.this, "Finally!!!!", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }).addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            System.out.println("Error 123 : " + e.getMessage());
+//                        }
+//                    }).addOnCanceledListener(new OnCanceledListener() {
+//                        @Override
+//                        public void onCanceled() {
+//                            System.out.println("Error 456");
+//                        }
+//                    });
+//
+//
+//                    //Creating QRcode
+//                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+//                    Bitmap bitmap = barcodeEncoder.encodeBitmap(ciphertextString, BarcodeFormat.QR_CODE, 350, 350);
+//                    QRimage.setImageBitmap(bitmap);
+                    Encrypt(value,usrInput1);
+                    System.out.println("n characters:"+upToNCharacters);
+                    check(upToNCharacters);
 
-                    System.out.println("SAlt: "+salt);
-                    // You can store the salt, it's not secret. Don't store the key. Derive from password every time
-                    //Log.i(TAG, "Salt: " + salt);
 
-                    //Generating Key
-                    key = generateKeyFromPassword(EXAMPLE_PASSWORD, salt);
-
-
-
-                    //Performing Encryption
-                    CipherTextIvMac cipherTextIvMac = encrypt(usrInput1,key);
-                    //store or send to server
-                    String ciphertextString = cipherTextIvMac.toString().trim();
-                    //Taking 10 characters from ciphertext to be document name
-                    String upToNCharacters = ciphertextString.substring(0, Math.min(ciphertextString.length(), 10));
-                    //String key1=keyString(key);
-
-                    //String Values in Firebase in Format documentname->ncharacters  and value->PrivateKey
-                    databaseReference.child("keyName").child(upToNCharacters).setValue(Sprivatekey2).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(MainActivity.this, "Finally!!!!", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            System.out.println("Error 123 : " + e.getMessage());
-                        }
-                    }).addOnCanceledListener(new OnCanceledListener() {
-                        @Override
-                        public void onCanceled() {
-                            System.out.println("Error 456");
-                        }
-                    });
-
-
-                    //Creating QRcode
-                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                    Bitmap bitmap = barcodeEncoder.encodeBitmap(ciphertextString, BarcodeFormat.QR_CODE, 350, 350);
-                    QRimage.setImageBitmap(bitmap);
-
-                    Share.setOnClickListener(v1 -> {
-                        OnClickShare(QRimage);
-                    });
 
                     //System.out.println("Cipher Text:"+ciphertextString);
                     //System.out.println("First n Characters > Document name : "+upToNCharacters);
@@ -187,14 +185,14 @@ public class MainActivity extends AppCompatActivity {
 //                            // ...
 //                        }
 //                    });
-                   // SecretKeys dkey = keys(Sprivatekey2);
+                    // SecretKeys dkey = keys(Sprivatekey2);
 //                    String EXAMPLE_PASSWORD1 = Sprivatekey2+value[0] ;// Get password from user input
 //                    // You can store the salt, it's not secret. Don't store the key. Derive from password every time
 //                    //Log.i(TAG, "Salt: " + salt);
 //                    dkey = generateKeyFromPassword(EXAMPLE_PASSWORD1, salt);
 //                    System.out.println(dkey);
 //                    CipherTextIvMac cipherTextIvMac1 = new CipherTextIvMac(ciphertextString);
-//                    String plainText = decryptString(cipherTextIvMac1, dkey);
+////                    String plainText = decryptString(cipherTextIvMac1, dkey);
 //                    //textView.setText(plainText);
 //                    System.out.println("Decrypted Text: "+plainText);
 
@@ -207,30 +205,30 @@ public class MainActivity extends AppCompatActivity {
 //                    }
                     //System.out.println(keys);
                     //System.out.println(ciphertextString);
-                } catch (GeneralSecurityException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (WriterException e) {
-                    e.printStackTrace();
-                }catch(Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
         });
 
+        Share.setOnClickListener(v1 -> {
+            OnClickShare(QRimage);
+        });
 
+        Save.setOnClickListener(v1 -> {
+            OnClickSave(QRimage);
+        });
 
     }
-//Onclick method
+
+    //Onclick method
     private void OnClickShare(ImageView view) {
         //taking Bitmap from image view
-        Bitmap bitmap = ((BitmapDrawable)view.getDrawable()).getBitmap();
+        Bitmap bitmap = ((BitmapDrawable) view.getDrawable()).getBitmap();
         try {
             //getting location and saving image as qrcode.png
-            File file = new File(this.getExternalCacheDir(),"qrcode.png");
+            File file = new File(this.getExternalCacheDir(), "qrcode.png");
             FileOutputStream fOut = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
             fOut.flush();
@@ -253,4 +251,157 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void OnClickSave(ImageView view) {
+        Bitmap bitmap = ((BitmapDrawable) view.getDrawable()).getBitmap();
+        File pictureFile = getOutputMediaFile();
+        if (pictureFile == null) {
+            Log.d(TAG,
+                    "Error creating media file, check storage permissions: ");// e.getMessage());
+            return;
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(pictureFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            fos.close();
+
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "File not found: " + e.getMessage());
+        } catch (IOException e) {
+            Log.d(TAG, "Error accessing file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Create a File for saving an image or video
+     */
+    private File getOutputMediaFile() {
+    // To be safe, you should check that the SDCard is mounted
+    // using Environment.getExternalStorageState() before doing this.
+        File mediaStorageDir = new
+                File(Environment.getExternalStorageDirectory()
+                + "/Android/data/"
+                + getApplicationContext().getPackageName()
+                + "/Files");
+
+// This location works best if you want the created images to be shared
+// between applications and persist after your app has been uninstalled.
+
+// Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+
+            if (!mediaStorageDir.mkdirs()) {
+                return null;
+            }
+        }
+// Create a media file name
+        String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmm").format(new Date());
+        File mediaFile;
+        String mImageName = "MI_" + timeStamp + ".jpg";
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+        return mediaFile;
+    }
+
+    private String Encrypt( String value[], String usrInput1) {
+        SecretKeys privatekey2 = null;
+        try {
+            SecretKeys key;
+            privatekey2 = generateKey();
+            //converting private key into String
+            Sprivatekey2 = keyString(privatekey2);
+            // Creating a String(private key generated randomly + public key from database) to encrypt using salt
+            String EXAMPLE_PASSWORD = Sprivatekey2 + value[0];
+            //Salt string
+            String salt = "RightWatchmanRightWatchman";
+
+            System.out.println("SAlt: " + salt);
+            // You can store the salt, it's not secret. Don't store the key. Derive from password every time
+            //Log.i(TAG, "Salt: " + salt);
+
+            //Generating Key
+            key = generateKeyFromPassword(EXAMPLE_PASSWORD, salt);
+
+
+            //Performing Encryption
+            CipherTextIvMac cipherTextIvMac = encrypt(usrInput1, key);
+            //store or send to server
+             ciphertextString = cipherTextIvMac.toString().trim();
+            //Taking 10 characters from ciphertext to be document name
+             upToNCharacters = ciphertextString.substring(0, Math.min(ciphertextString.length(), 10));
+
+ // Simulating Run condition in case of contradicing document name
+//             if(val){
+//                upToNCharacters = "yOR5bajdBW";
+//            }else{
+//                upToNCharacters = ciphertextString.substring(0, Math.min(ciphertextString.length(), 10));
+//            }
+//
+//            check(upToNCharacters);
+
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+       return upToNCharacters;
+    }
+    //Checking in database function
+    private void check(String upToNCharacters){
+
+        databaseReference.child("keyName").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.child(upToNCharacters).exists()) {
+                    System.out.println(upToNCharacters);
+                    System.out.println("I am getting executed because of same 10::");
+                    val =false;
+                    Encrypt(value,usrInput1);
+                }else{
+                    Enterintodb();
+                    try {
+                        generateqr();
+                    } catch (WriterException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void Enterintodb(){
+        databaseReference.child("keyName").child(upToNCharacters).setValue(Sprivatekey2).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(MainActivity.this, "Finally!!!!", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("Error 123 : " + e.getMessage());
+            }
+        }).addOnCanceledListener(new OnCanceledListener() {
+            @Override
+            public void onCanceled() {
+                System.out.println("Error 456");
+            }
+        });
+    }
+
+    private void generateqr() throws WriterException {
+        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+        Bitmap bitmap = barcodeEncoder.encodeBitmap(ciphertextString, BarcodeFormat.QR_CODE, 350, 350);
+        QRimage.setImageBitmap(bitmap);
+    }
 }
+
+

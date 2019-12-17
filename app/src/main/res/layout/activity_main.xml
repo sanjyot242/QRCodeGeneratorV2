@@ -42,10 +42,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/qrimage"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="90dp"
+        android:layout_marginTop="32dp"
         android:onClick="OnClickShare"
         android:text="Share" />
 
+    <Button
+        android:id="@+id/Save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/qrimage"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="220dp"
+        android:layout_marginTop="32dp"
+        android:text="Save" />
 
 </RelativeLayout>
