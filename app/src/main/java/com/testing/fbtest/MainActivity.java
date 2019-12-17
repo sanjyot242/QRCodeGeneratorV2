@@ -1,10 +1,5 @@
 package com.testing.fbtest;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -18,6 +13,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -41,7 +41,11 @@ import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.tozny.crypto.android.AesCbcWithIntegrity.*;
+import static com.tozny.crypto.android.AesCbcWithIntegrity.CipherTextIvMac;
+import static com.tozny.crypto.android.AesCbcWithIntegrity.SecretKeys;
+import static com.tozny.crypto.android.AesCbcWithIntegrity.encrypt;
+import static com.tozny.crypto.android.AesCbcWithIntegrity.generateKey;
+import static com.tozny.crypto.android.AesCbcWithIntegrity.generateKeyFromPassword;
 import static com.tozny.crypto.android.AesCbcWithIntegrity.keyString;
 
 public class MainActivity extends AppCompatActivity {
@@ -100,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
 
         //OnClick Listner
         generate.setOnClickListener(v -> {
+
+            authBottomSheet bottomSheet = new authBottomSheet();
+            bottomSheet.show(getSupportFragmentManager(),"bottsheet");
             //Taking UserInput
             String usrInput = input.getText().toString().trim();
             //Appending String to user input

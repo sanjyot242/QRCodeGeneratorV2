@@ -14,9 +14,11 @@
 
     </TextView>
 
-
-
-
-
-
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="@color/colorAccent"
+        android:hint="Enter your password here:"
+        />
 </LinearLayout>
